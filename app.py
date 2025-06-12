@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import gdown
+
 
 # Set up wide layout before any Streamlit widgets
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
@@ -8,12 +10,13 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
 @st.cache_data
 def load_data():
-    url = "https://drive.google.com/uc?export=download&id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
-    df = pd.read_csv(url)
-    st.write("🚨 Columns loaded from file:")
-    st.write(df.columns.tolist())  # 👈 this will show you what's actually there
-    return df
+    url = "https://drive.google.com/uc?id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
+    output = "combined_mdot_bid_data.csv"
+    gdown.download(url, output, quiet=False)
 
+    df = pd.read_csv(output)
+    df["Letting Date"] = pd.to_datetime(df["Letting Date"], errors="coerce").dt.date
+    return df
 
 
 # Load and preprocess data
