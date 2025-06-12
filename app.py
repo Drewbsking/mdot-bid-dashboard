@@ -10,10 +10,10 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 def load_data():
     url = "https://drive.google.com/uc?export=download&id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
     df = pd.read_csv(url)
-    df["Letting Date"] = pd.to_datetime(df["Letting Date"], errors="coerce")
-    df = df.dropna(subset=["Letting Date"])  # Optional: remove bad rows
-    df["Letting Date"] = df["Letting Date"].dt.date
+    st.write("🚨 Columns loaded from file:")
+    st.write(df.columns.tolist())  # 👈 this will show you what's actually there
     return df
+
 
 
 # Load and preprocess data
