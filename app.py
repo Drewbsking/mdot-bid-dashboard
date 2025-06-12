@@ -77,6 +77,12 @@ filtered = filtered[filtered["Letting Date"].between(date_range[0], date_range[1
 if lowest_only:
     filtered = filtered[filtered["Vend Rank"] == 1]
 
+# ✅ Check if the filtered data is empty and STOP
+if filtered.empty:
+    st.warning("⚠️ No matching records found. Please adjust your filters.")
+    st.stop()
+
+
 # --- Display results ---
 if not filtered.empty:
     st.subheader("Filtered Results")
