@@ -11,16 +11,13 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
 @st.cache_data
 def load_data():
-    output = "combined_mdot_bid_data.csv"
+    url = "https://drive.google.com/uc?id=1yG9OCnGArgAeRan9F3_cBblDqAziCVYa"
+    local_file = "combined_mdot_bid_data.parquet"
 
-    # Download only if file doesn't exist
-    if not os.path.exists(output):
-        url = "https://drive.google.com/uc?id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
-        gdown.download(url, output, quiet=False)
+    if not os.path.exists(local_file):
+        gdown.download(url, local_file, quiet=False)
 
-    df = pd.read_csv(output)
-    df["Letting Date"] = pd.to_datetime(df["Letting Date"], errors="coerce").dt.date
-    return df
+    return pd.read_parquet(local_file)
 
 # Load and preprocess data
 df = load_data()
