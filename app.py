@@ -7,11 +7,14 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
 
 @st.cache_data
-
 def load_data():
-    #For Local Run#return pd.read_csv("combined_mdot_bid_data.csv", parse_dates=["Letting Date"])
     url = "https://drive.google.com/uc?export=download&id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
-    return pd.read_csv(url, parse_dates=["Letting Date"])
+    df = pd.read_csv(url)
+    df["Letting Date"] = pd.to_datetime(df["Letting Date"], errors="coerce")
+    df = df.dropna(subset=["Letting Date"])  # Optional: remove bad rows
+    df["Letting Date"] = df["Letting Date"].dt.date
+    return df
+
 
 # Load and preprocess data
 df = load_data()
