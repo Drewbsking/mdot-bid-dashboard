@@ -4,8 +4,7 @@ import pandas as pd
 # --- Basic Page Setup ---
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
-# --- Load Data ---
-@st.cache_data
+# --- Load Data (no cache) ---
 def load_data():
     return pd.read_parquet("combined_mdot_bid_data.parquet")
 
@@ -51,8 +50,8 @@ qty_range = st.slider(
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
 
 # --- Date Filter ---
-min_date = min(df["Letting Date"])
-max_date = max(df["Letting Date"])
+min_date = df["Letting Date"].min()
+max_date = df["Letting Date"].max()
 date_range = st.slider(
     "Letting Date Range",
     min_value=min_date,
