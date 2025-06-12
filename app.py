@@ -9,7 +9,9 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 @st.cache_data
 
 def load_data():
-    return pd.read_csv("combined_mdot_bid_data.csv", parse_dates=["Letting Date"])
+    #For Local Run#return pd.read_csv("combined_mdot_bid_data.csv", parse_dates=["Letting Date"])
+    url = "https://drive.google.com/uc?export=download&id=11Qr5RbIr0Ym0nEjKpMJY36w_BmtCqV51"
+    return pd.read_csv(url, parse_dates=["Letting Date"])
 
 # Load and preprocess data
 df = load_data()
