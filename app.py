@@ -33,19 +33,24 @@ max_qty = int(df["Quantity"].max())
 
 if selected_description:
     item_data = df[df["Item Description/Supplemental Description"] == selected_description]
-    min_qty = int(item_data["Quantity"].min())
-    max_qty = int(item_data["Quantity"].max())
 
-    if min_qty == max_qty:
-        min_qty = int(min_qty * 0.9)
-        max_qty = int(max_qty * 1.1) + 1
+    if not item_data.empty:
+        min_qty = int(item_data["Quantity"].min())
+        max_qty = int(item_data["Quantity"].max())
 
-    qty_range = st.slider(
-        "Quantity Range (Auto-scaled to item)",
-        min_value=min_qty,
-        max_value=max_qty,
-        value=(min_qty, max_qty)
-    )
+        if min_qty == max_qty:
+            min_qty = int(min_qty * 0.9)
+            max_qty = int(max_qty * 1.1) + 1  # Avoid fixed range
+
+        qty_range = st.slider(
+            "Quantity Range (Auto-scaled to item)",
+            min_value=min_qty,
+            max_value=max_qty,
+            value=(min_qty, max_qty)
+        )
+    else:
+        st.warning("No data found for this pay item.")
+        st.stop()  # Stops app execution safely
 else:
     qty_range = st.slider(
         "Quantity Range (All items)",
@@ -53,6 +58,7 @@ else:
         max_value=max_qty,
         value=(min_qty, max_qty)
     )
+
 
 # --- Lowest bidder checkbox ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
