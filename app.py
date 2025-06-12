@@ -1,23 +1,14 @@
 import streamlit as st
 import pandas as pd
-import gdown
 import os
-
 
 # Set up wide layout before any Streamlit widgets
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
-
-
 @st.cache_data
 def load_data():
-    url = "https://drive.google.com/uc?id=1yG9OCnGArgAeRan9F3_cBblDqAziCVYa"
-    local_file = "combined_mdot_bid_data.parquet"
-
-    if not os.path.exists(local_file):
-        gdown.download(url, local_file, quiet=False)
-
-    return pd.read_parquet(local_file)
+    # Just load the local file in your GitHub repo
+    return pd.read_parquet("combined_mdot_bid_data.parquet")
 
 # Load and preprocess data
 df = load_data()
@@ -29,20 +20,17 @@ if st.button("🔄 Reset Filters"):
     st.rerun()
 
 # --- Search input ---
-# Get sorted list of unique item descriptions
 descriptions = sorted(df["Item Description/Supplemental Description"].dropna().unique())
-
-# Autocomplete-style dropdown
 selected_description = st.selectbox(
     "Select Pay Item Description (start typing):",
-    options=[""] + descriptions,  # Add empty string to allow 'all'
+    options=[""] + descriptions,
     index=0
 )
-
 
 # --- Quantity slider ---
 min_qty = int(df["Quantity"].min())
 max_qty = int(df["Quantity"].max())
+
 if selected_description:
     item_data = df[df["Item Description/Supplemental Description"] == selected_description]
     min_qty = int(item_data["Quantity"].min())
@@ -50,7 +38,7 @@ if selected_description:
 
     if min_qty == max_qty:
         min_qty = int(min_qty * 0.9)
-        max_qty = int(max_qty * 1.1) + 1  # Add 1 to avoid same value
+        max_qty = int(max_qty * 1.1) + 1
 
     qty_range = st.slider(
         "Quantity Range (Auto-scaled to item)",
@@ -58,15 +46,13 @@ if selected_description:
         max_value=max_qty,
         value=(min_qty, max_qty)
     )
-
 else:
     qty_range = st.slider(
         "Quantity Range (All items)",
-        min_value=int(df["Quantity"].min()),
-        max_value=int(df["Quantity"].max()),
-        value=(int(df["Quantity"].min()), int(df["Quantity"].max()))
+        min_value=min_qty,
+        max_value=max_qty,
+        value=(min_qty, max_qty)
     )
-
 
 # --- Lowest bidder checkbox ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
@@ -90,17 +76,14 @@ if not filtered.empty:
     st.subheader("Filtered Results")
     st.write(f"🔎 Matches: {len(filtered)}")
 
-    # Calculate weighted average
     total_quantity = filtered["Quantity"].sum()
     weighted_avg = (filtered["Bid Price"] * filtered["Quantity"]).sum() / total_quantity if total_quantity else None
 
-    # Show average, weighted average, min, max
     st.write(f"📊 Average Unit Price: ${filtered['Bid Price'].mean():.2f}")
     if weighted_avg is not None:
         st.write(f"📦 Weighted Average Unit Price: ${weighted_avg:.2f}")
     st.write(f"💲 Min: ${filtered['Bid Price'].min():.2f} | Max: ${filtered['Bid Price'].max():.2f}")
 
-    # Show data table
     st.dataframe(filtered[[
         'Proposal ID',
         'Item Description/Supplemental Description',
@@ -114,4 +97,3 @@ if not filtered.empty:
     ]])
 else:
     st.warning("No matching records found.")
-
