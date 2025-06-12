@@ -7,7 +7,7 @@ st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
 @st.cache_data
 def load_data():
-    # Just load the local file in your GitHub repo
+    # Load from local file in your GitHub repo
     return pd.read_parquet("combined_mdot_bid_data.parquet")
 
 # Load and preprocess data
@@ -40,25 +40,33 @@ if selected_description:
 
         if min_qty == max_qty:
             min_qty = int(min_qty * 0.9)
-            max_qty = int(max_qty * 1.1) + 1  # Avoid fixed range
+            max_qty = int(max_qty * 1.1) + 1
 
         qty_range = st.slider(
             "Quantity Range (Auto-scaled to item)",
             min_value=min_qty,
             max_value=max_qty,
-            value=(min_qty, max_qty)
+            value=(min_qty, max_qty),
+            key="qty_slider"
         )
+
+        filtered_preview = item_data[
+            item_data["Quantity"].between(qty_range[0], qty_range[1])
+        ]
+        if filtered_preview.empty:
+            st.warning("⚠️ No matching records for this quantity range.")
+            st.stop()
     else:
-        st.warning("No data found for this pay item.")
-        st.stop()  # Stops app execution safely
+        st.warning("⚠️ No data found for this pay item.")
+        st.stop()
 else:
     qty_range = st.slider(
         "Quantity Range (All items)",
         min_value=min_qty,
         max_value=max_qty,
-        value=(min_qty, max_qty)
+        value=(min_qty, max_qty),
+        key="qty_slider_all"
     )
-
 
 # --- Lowest bidder checkbox ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
@@ -66,7 +74,12 @@ lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=T
 # --- Letting date range slider ---
 min_date = min(df["Letting Date"])
 max_date = max(df["Letting Date"])
-date_range = st.slider("Letting Date Range", min_value=min_date, max_value=max_date, value=(min_date, max_date))
+date_range = st.slider(
+    "Letting Date Range",
+    min_value=min_date,
+    max_value=max_date,
+    value=(min_date, max_date)
+)
 
 # --- Filter data ---
 filtered = df.copy()
@@ -77,35 +90,31 @@ filtered = filtered[filtered["Letting Date"].between(date_range[0], date_range[1
 if lowest_only:
     filtered = filtered[filtered["Vend Rank"] == 1]
 
-# ✅ Check if the filtered data is empty and STOP
+# ✅ Handle case where no data matches all filters
 if filtered.empty:
     st.warning("⚠️ No matching records found. Please adjust your filters.")
     st.stop()
 
-
 # --- Display results ---
-if not filtered.empty:
-    st.subheader("Filtered Results")
-    st.write(f"🔎 Matches: {len(filtered)}")
+st.subheader("Filtered Results")
+st.write(f"🔎 Matches: {len(filtered)}")
 
-    total_quantity = filtered["Quantity"].sum()
-    weighted_avg = (filtered["Bid Price"] * filtered["Quantity"]).sum() / total_quantity if total_quantity else None
+total_quantity = filtered["Quantity"].sum()
+weighted_avg = (filtered["Bid Price"] * filtered["Quantity"]).sum() / total_quantity if total_quantity else None
 
-    st.write(f"📊 Average Unit Price: ${filtered['Bid Price'].mean():.2f}")
-    if weighted_avg is not None:
-        st.write(f"📦 Weighted Average Unit Price: ${weighted_avg:.2f}")
-    st.write(f"💲 Min: ${filtered['Bid Price'].min():.2f} | Max: ${filtered['Bid Price'].max():.2f}")
+st.write(f"📊 Average Unit Price: ${filtered['Bid Price'].mean():.2f}")
+if weighted_avg is not None:
+    st.write(f"📦 Weighted Average Unit Price: ${weighted_avg:.2f}")
+st.write(f"💲 Min: ${filtered['Bid Price'].min():.2f} | Max: ${filtered['Bid Price'].max():.2f}")
 
-    st.dataframe(filtered[[
-        'Proposal ID',
-        'Item Description/Supplemental Description',
-        'Unit',
-        'Quantity',
-        'Bid Price',
-        'Ext Amount',
-        'Vendor Name',
-        'Vend Rank',
-        'Letting Date'
-    ]])
-else:
-    st.warning("No matching records found.")
+st.dataframe(filtered[[
+    'Proposal ID',
+    'Item Description/Supplemental Description',
+    'Unit',
+    'Quantity',
+    'Bid Price',
+    'Ext Amount',
+    'Vendor Name',
+    'Vend Rank',
+    'Letting Date'
+]])
