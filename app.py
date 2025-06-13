@@ -25,7 +25,6 @@ except FileNotFoundError:
 with st.sidebar:
     st.header("🔎 Filter Options")
 
-    # Reset button
     if st.button("🔄 Reset Filters"):
         st.rerun()
 
@@ -74,6 +73,25 @@ with st.sidebar:
     # RCOC Filter
     show_rcoc_only = st.checkbox("Only include RCOC projects?")
 
+    # RCOC Sidebar Info
+    if rcoc_ids:
+        all_rcoc_ids_set = set(rcoc_ids)
+        matched_rcoc_ids = sorted(set(df["Proposal ID"]).intersection(all_rcoc_ids_set))
+        unmatched_rcoc_ids = sorted(all_rcoc_ids_set - set(matched_rcoc_ids))
+
+        st.markdown("📋 **RCOC Proposal Check**")
+        if matched_rcoc_ids:
+            st.markdown(f"✅ **Matched Proposals ({len(matched_rcoc_ids)}):**")
+            for pid in matched_rcoc_ids:
+                st.markdown(f"- `{pid}`")
+        else:
+            st.markdown("❌ No RCOC projects matched current dataset.")
+
+        if unmatched_rcoc_ids:
+            with st.expander(f"📄 Unmatched Proposal IDs ({len(unmatched_rcoc_ids)})"):
+                for pid in unmatched_rcoc_ids:
+                    st.markdown(f"- `{pid}`")
+
 # --- Filter Data ---
 if selected_description:
     item_data = df[df["Item Description/Supplemental Description"] == selected_description]
@@ -106,19 +124,6 @@ if lowest_only:
 if show_rcoc_only and rcoc_ids:
     all_rcoc_ids_set = set(rcoc_ids)
     filtered = filtered[filtered["Proposal ID"].isin(all_rcoc_ids_set)]
-
-    matched_rcoc_ids = sorted(set(filtered["Proposal ID"]))
-    unmatched_rcoc_ids = sorted(all_rcoc_ids_set - set(matched_rcoc_ids))
-
-    st.markdown("### ✅ Included RCOC Projects in Results")
-    if matched_rcoc_ids:
-        st.write(matched_rcoc_ids)
-    else:
-        st.info("No RCOC projects matched the current filters.")
-
-    if unmatched_rcoc_ids:
-        with st.expander("📄 Proposal IDs not matched in data"):
-            st.write(unmatched_rcoc_ids)
 
 # --- Display Results ---
 if filtered.empty:
@@ -154,7 +159,6 @@ st.dataframe(display_df[[
     'Vend Rank',
     'Letting Date'
 ]])
-
 
 # --- Footer ---
 st.markdown("---")
