@@ -51,7 +51,7 @@ with st.sidebar:
     ]
 
     selected_counties = st.multiselect(
-        "Select Counties:",
+        "Select Counties (Default: SEMCOG region, inclusive of MDOT Metro, plus Lapeer and Genesee):",
         options=sorted(county_map.keys()),
         default=default_counties
     )
