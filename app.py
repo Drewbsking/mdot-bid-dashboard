@@ -4,14 +4,21 @@ import pandas as pd
 # --- Basic Page Setup ---
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 
-# --- Load Data (no cache) ---
+# --- Page Title ---
+st.title("MDOT Pay Item Price Explorer")
+
+# --- Load Data ---
 def load_data():
     return pd.read_parquet("combined_mdot_bid_data.parquet")
 
 df = load_data()
 df["Letting Date"] = pd.to_datetime(df["Letting Date"]).dt.date
 
-# --- County Filter (All counties, defaulting to SEMCOG + Lapeer + Genesee) ---
+# --- Reset Button ---
+if st.button("🔄 Reset Filters"):
+    st.rerun()
+
+# --- County Filter ---
 county_map = {
     "Alcona": 1, "Alger": 2, "Allegan": 3, "Alpena": 4, "Antrim": 5, "Arenac": 6, "Baraga": 7, "Barry": 8,
     "Bay": 9, "Benzie": 10, "Berrien": 11, "Branch": 12, "Calhoun": 13, "Cass": 14, "Charlevoix": 15,
@@ -43,15 +50,7 @@ if selected_counties:
     county_codes = [f"{county_map[c]:02d}" for c in selected_counties]
     df = df[df["Proposal ID"].astype(str).str[:2].isin(county_codes)]
 
-
-# --- Start Page ---
-st.title("MDOT Pay Item Price Explorer")
-
-# Reset Button
-if st.button("🔄 Reset Filters"):
-    st.rerun()
-
-# --- Search Input ---
+# --- Item Description Filter ---
 descriptions = sorted(df["Item Description/Supplemental Description"].dropna().unique())
 selected_description = st.selectbox(
     "Select Pay Item Description (start typing):",
@@ -59,7 +58,7 @@ selected_description = st.selectbox(
     index=0
 )
 
-# --- Quantity Slider ---
+# --- Quantity Filter ---
 if selected_description:
     item_data = df[df["Item Description/Supplemental Description"] == selected_description]
 else:
@@ -79,12 +78,13 @@ qty_range = st.slider(
     value=(min_qty, max_qty)
 )
 
-# --- Lowest Bidder Filter ---
+# --- Vendor Rank Filter ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
 
-# --- Date Filter ---
+# --- Letting Date Filter ---
 min_date = df["Letting Date"].min()
 max_date = df["Letting Date"].max()
+
 date_range = st.slider(
     "Letting Date Range",
     min_value=min_date,
@@ -97,6 +97,7 @@ filtered = item_data[
     item_data["Quantity"].between(qty_range[0], qty_range[1]) &
     item_data["Letting Date"].between(date_range[0], date_range[1])
 ]
+
 if lowest_only:
     filtered = filtered[filtered["Vend Rank"] == 1]
 
@@ -108,7 +109,7 @@ if filtered.empty:
 st.subheader("Filtered Results")
 st.write(f"🔎 Matches: {len(filtered)}")
 
-# Summary Stats
+# --- Summary Stats ---
 total_quantity = filtered["Quantity"].sum()
 weighted_avg = (filtered["Bid Price"] * filtered["Quantity"]).sum() / total_quantity if total_quantity else None
 
@@ -117,6 +118,7 @@ if weighted_avg:
     st.write(f"📦 Weighted Average Unit Price: ${weighted_avg:.2f}")
 st.write(f"💲 Min: ${filtered['Bid Price'].min():.2f} | Max: ${filtered['Bid Price'].max():.2f}")
 
+# --- Data Table ---
 st.dataframe(filtered[[
     'Proposal ID',
     'Item Description/Supplemental Description',
@@ -128,3 +130,7 @@ st.dataframe(filtered[[
     'Vend Rank',
     'Letting Date'
 ]])
+
+# --- Footer ---
+st.markdown("---")
+st.markdown("**Questions, bugs, or feature requests? Contact Andrew Bates.**")
