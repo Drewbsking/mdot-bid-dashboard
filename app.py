@@ -133,12 +133,17 @@ total_quantity = filtered["Quantity"].sum()
 weighted_avg = (filtered["Bid Price"] * filtered["Quantity"]).sum() / total_quantity if total_quantity else None
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Average Unit Price", f"${filtered['Bid Price'].mean():.2f}")
-col2.metric("Weighted Avg Price", f"${weighted_avg:.2f}" if weighted_avg else "N/A")
-col3.metric("Min / Max", f"${filtered['Bid Price'].min():.2f} / ${filtered['Bid Price'].max():.2f}")
+col1.metric("Average Unit Price", f"${filtered['Bid Price'].mean():,.2f}")
+col2.metric("Weighted Avg Price", f"${weighted_avg:,.2f}" if weighted_avg else "N/A")
+col3.metric("Min / Max", f"${filtered['Bid Price'].min():,.2f} / ${filtered['Bid Price'].max():,.2f}")
 
 # --- Data Table ---
-st.dataframe(filtered[[
+display_df = filtered.copy()
+display_df["Quantity"] = display_df["Quantity"].apply(lambda x: f"{x:,.0f}")
+display_df["Bid Price"] = display_df["Bid Price"].apply(lambda x: f"${x:,.2f}")
+display_df["Ext Amount"] = display_df["Ext Amount"].apply(lambda x: f"${x:,.2f}")
+
+st.dataframe(display_df[[
     'Proposal ID',
     'Item Description/Supplemental Description',
     'Unit',
@@ -149,6 +154,7 @@ st.dataframe(filtered[[
     'Vend Rank',
     'Letting Date'
 ]])
+
 
 # --- Footer ---
 st.markdown("---")
