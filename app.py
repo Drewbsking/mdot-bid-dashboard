@@ -3,16 +3,24 @@ import pandas as pd
 
 # --- Basic Page Setup ---
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
-
-# --- Page Title ---
 st.title("MDOT Pay Item Price Explorer")
+
 
 # --- Load Data ---
 def load_data():
     return pd.read_parquet("combined_mdot_bid_data.parquet")
 
+
 df = load_data()
 df["Letting Date"] = pd.to_datetime(df["Letting Date"]).dt.date
+
+# --- Load RCOC Proposal IDs from file ---
+try:
+    with open("rcocProjects.txt", "r") as f:
+        rcoc_ids = [line.strip() for line in f if line.strip()]
+except FileNotFoundError:
+    rcoc_ids = []
+    st.warning("⚠️ RCOC project file not found.")
 
 # --- Reset Button ---
 if st.button("🔄 Reset Filters"):
@@ -81,6 +89,26 @@ qty_range = st.slider(
 # --- Vendor Rank Filter ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
 
+# --- Letting Date Filter ---
+min_date = df["Letting Date"].min()
+max_date = df["Letting Date"].max()
+
+date_range = st.slider(
+    "Letting Date Range",
+    min_value=min_date,
+    max_value=max_date,
+    value=(min_date, max_date)
+)
+
+# --- Apply Filters ---
+filtered = item_data[
+    item_data["Quantity"].between(qty_range[0], qty_range[1]) &
+    item_data["Letting Date"].between(date_range[0], date_range[1])
+    ]
+
+if lowest_only:
+    filtered = filtered[filtered["Vend Rank"] == 1]
+
 # --- RCOC Filter ---
 show_rcoc_only = st.checkbox("Only include RCOC projects?")
 
@@ -100,26 +128,6 @@ if show_rcoc_only and rcoc_ids:
     if unmatched_rcoc_ids:
         with st.expander("📄 Proposal IDs not in filtered results (possibly not in dataset):"):
             st.write(unmatched_rcoc_ids)
-
-# --- Letting Date Filter ---
-min_date = df["Letting Date"].min()
-max_date = df["Letting Date"].max()
-
-date_range = st.slider(
-    "Letting Date Range",
-    min_value=min_date,
-    max_value=max_date,
-    value=(min_date, max_date)
-)
-
-# --- Apply Filters ---
-filtered = item_data[
-    item_data["Quantity"].between(qty_range[0], qty_range[1]) &
-    item_data["Letting Date"].between(date_range[0], date_range[1])
-]
-
-if lowest_only:
-    filtered = filtered[filtered["Vend Rank"] == 1]
 
 # --- Display Results ---
 if filtered.empty:
