@@ -74,8 +74,7 @@ with st.sidebar:
     # RCOC Filter
     show_rcoc_only = st.checkbox("Only include RCOC projects?")
 
-    # RCOC Sidebar Info
-    if rcoc_ids:
+    if show_rcoc_only and rcoc_ids:
         all_rcoc_ids_set = set(rcoc_ids)
         matched_rcoc_ids = sorted(set(df["Proposal ID"]).intersection(all_rcoc_ids_set))
         unmatched_rcoc_ids = sorted(all_rcoc_ids_set - set(matched_rcoc_ids))
