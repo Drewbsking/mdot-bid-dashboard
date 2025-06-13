@@ -81,6 +81,26 @@ qty_range = st.slider(
 # --- Vendor Rank Filter ---
 lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
 
+# --- RCOC Filter ---
+show_rcoc_only = st.checkbox("Only include RCOC projects?")
+
+if show_rcoc_only and rcoc_ids:
+    all_rcoc_ids_set = set(rcoc_ids)
+    filtered = filtered[filtered["Proposal ID"].isin(all_rcoc_ids_set)]
+
+    matched_rcoc_ids = sorted(set(filtered["Proposal ID"]))
+    unmatched_rcoc_ids = sorted(all_rcoc_ids_set - set(matched_rcoc_ids))
+
+    st.markdown("### ✅ Included RCOC Projects in Results:")
+    if matched_rcoc_ids:
+        st.write(matched_rcoc_ids)
+    else:
+        st.info("No RCOC projects matched the current filters.")
+
+    if unmatched_rcoc_ids:
+        with st.expander("📄 Proposal IDs not in filtered results (possibly not in dataset):"):
+            st.write(unmatched_rcoc_ids)
+
 # --- Letting Date Filter ---
 min_date = df["Letting Date"].min()
 max_date = df["Letting Date"].max()
