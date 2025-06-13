@@ -4,6 +4,7 @@ import pandas as pd
 # --- Page Setup ---
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 st.title("🛣️ MDOT Pay Item Price Explorer")
+st.markdown("#### Questions, bugs, or feature requests? Contact Andrew Bates.")
 
 # --- Load Data ---
 @st.cache_data
@@ -162,4 +163,5 @@ st.dataframe(display_df[[
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("**Questions, bugs, or feature requests? Contact Andrew Bates.**")
+st.markdown("_This tool is for informational purposes only and is not an official source for contract pricing or bid disputes._")
+
