@@ -4,7 +4,8 @@ import pandas as pd
 # --- Page Setup ---
 st.set_page_config(layout="wide", page_title="MDOT Price Explorer")
 st.title("🛣️ MDOT Pay Item Price Explorer")
-st.markdown("#### Questions, bugs, or feature requests? Contact Andrew Bates.")
+st.markdown("_Use the sidebar (👈) for filter options._")
+st.markdown("Questions, bugs, or feature requests? Contact Andrew Bates.")
 
 # --- Load Data ---
 @st.cache_data
