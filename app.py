@@ -69,6 +69,9 @@ with st.sidebar:
         index=0
     )
 
+    # Add text input for search
+    search_term = st.text_input("Search Pay Item Descriptions (contains term):").strip()
+
     # Vendor Rank Filter
     lowest_only = st.checkbox("Only include lowest bidder (Vend Rank = 1)?", value=True)
 
@@ -95,9 +98,15 @@ with st.sidebar:
 
 # --- Filter Data ---
 if selected_description:
+    # Dropdown exact match takes priority
     item_data = df[df["Item Description/Supplemental Description"] == selected_description]
+elif search_term:
+    # If no dropdown selected, use search term
+    item_data = df[df["Item Description/Supplemental Description"].str.contains(search_term, case=False, na=False)]
 else:
+    # No filter applied — show everything
     item_data = df.copy()
+
 
 # Quantity Range
 min_qty = int(item_data["Quantity"].min())
