@@ -165,4 +165,7 @@ st.dataframe(display_df[[
 st.markdown("---")
 st.markdown("Questions, bugs, or feature requests? Contact Andrew Bates.")
 st.markdown("_This tool is for informational purposes only and is not an official source for contract pricing or bid disputes._")
+st.markdown(
+    "[🗺️ Michigan Counties Map](https://www.michigan.gov/lara/bureau-list/bchs/adult/online-lookups/michigan-counties-map)"
+)
 
