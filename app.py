@@ -158,10 +158,47 @@ display_df["Quantity"] = display_df["Quantity"].apply(lambda x: f"{x:,.0f}")
 display_df["Bid Price"] = display_df["Bid Price"].apply(lambda x: f"${x:,.2f}")
 display_df["Ext Amount"] = display_df["Ext Amount"].apply(lambda x: f"${x:,.2f}")
 
+# --- Pagination Setup ---
+rows_per_page = 200
+total_rows = len(display_df)
+total_pages = (total_rows - 1) // rows_per_page + 1
+
+page = st.number_input(
+    "Page:",
+    min_value=1,
+    max_value=total_pages,
+    value=1,
+    step=1,
+    format="%d"
+)
+
+start_idx = (page - 1) * rows_per_page
+end_idx = start_idx + rows_per_page
+paginated_df = display_df.iloc[start_idx:end_idx].copy()
+
+# Add clickable Proposal ID links (only to paginated subset)
+paginated_df["Proposal ID"] = paginated_df["Proposal ID"].apply(
+    lambda pid: f'<a href="https://mdotjboss.state.mi.us/CCI/search.htm?selectedReportType=gcli&selectedPeriodType=1y&contractProjectNum={pid}" target="_blank">{pid}</a>'
+)
+
+# Display table
+st.write(paginated_df[columns_to_display].to_html(escape=False, index=False), unsafe_allow_html=True)
+
+# Show page info
+st.caption(f"Showing rows {start_idx + 1} to {min(end_idx, total_rows)} of {total_rows}")
+
+
+
+
+
 # Create CCI links for each Proposal ID
 display_df["Proposal ID"] = display_df["Proposal ID"].apply(
     lambda pid: f'<a href="https://mdotjboss.state.mi.us/CCI/search.htm?selectedReportType=gcli&selectedPeriodType=1y&contractProjectNum={pid}" target="_blank">{pid}</a>'
 )
+
+
+
+
 
 # Choose columns to show
 columns_to_display = [
