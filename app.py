@@ -181,6 +181,20 @@ paginated_df["Proposal ID"] = paginated_df["Proposal ID"].apply(
     lambda pid: f'<a href="https://mdotjboss.state.mi.us/CCI/search.htm?selectedReportType=gcli&selectedPeriodType=1y&contractProjectNum={pid}" target="_blank">{pid}</a>'
 )
 
+columns_to_display = [
+    'Proposal ID',
+    'Item Description/Supplemental Description',
+    'Unit',
+    'Quantity',
+    'Bid Price',
+    'Ext Amount',
+    'Vendor Name',
+    'Vend Rank',
+    'Letting Date'
+]
+
+
+
 # Display table
 st.write(paginated_df[columns_to_display].to_html(escape=False, index=False), unsafe_allow_html=True)
 
