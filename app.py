@@ -158,7 +158,13 @@ display_df["Quantity"] = display_df["Quantity"].apply(lambda x: f"{x:,.0f}")
 display_df["Bid Price"] = display_df["Bid Price"].apply(lambda x: f"${x:,.2f}")
 display_df["Ext Amount"] = display_df["Ext Amount"].apply(lambda x: f"${x:,.2f}")
 
-st.dataframe(display_df[[
+# Create CCI links for each Proposal ID
+display_df["Proposal ID"] = display_df["Proposal ID"].apply(
+    lambda pid: f'<a href="https://mdotjboss.state.mi.us/CCI/search.htm?selectedReportType=gcli&selectedPeriodType=1y&contractProjectNum={pid}" target="_blank">{pid}</a>'
+)
+
+# Choose columns to show
+columns_to_display = [
     'Proposal ID',
     'Item Description/Supplemental Description',
     'Unit',
@@ -168,7 +174,13 @@ st.dataframe(display_df[[
     'Vendor Name',
     'Vend Rank',
     'Letting Date'
-]])
+]
+
+# Convert to HTML and show
+st.write(display_df[columns_to_display].to_html(escape=False, index=False), unsafe_allow_html=True)
+
+
+
 
 # --- Footer ---
 st.markdown("---")
