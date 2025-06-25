@@ -188,37 +188,6 @@ st.write(paginated_df[columns_to_display].to_html(escape=False, index=False), un
 st.caption(f"Showing rows {start_idx + 1} to {min(end_idx, total_rows)} of {total_rows}")
 
 
-
-
-
-# Create CCI links for each Proposal ID
-display_df["Proposal ID"] = display_df["Proposal ID"].apply(
-    lambda pid: f'<a href="https://mdotjboss.state.mi.us/CCI/search.htm?selectedReportType=gcli&selectedPeriodType=1y&contractProjectNum={pid}" target="_blank">{pid}</a>'
-)
-
-
-
-
-
-# Choose columns to show
-columns_to_display = [
-    'Proposal ID',
-    'Item Description/Supplemental Description',
-    'Unit',
-    'Quantity',
-    'Bid Price',
-    'Ext Amount',
-    'Vendor Name',
-    'Vend Rank',
-    'Letting Date'
-]
-
-# Convert to HTML and show
-st.write(display_df[columns_to_display].to_html(escape=False, index=False), unsafe_allow_html=True)
-
-
-
-
 # --- Footer ---
 st.markdown("---")
 st.markdown("Questions, bugs, or feature requests? Contact Andrew Bates.")
